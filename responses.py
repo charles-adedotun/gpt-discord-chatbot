@@ -17,6 +17,10 @@ def ChatGPT_conversation(conversation):
     
     global response
     
+    # Replace line separator character with space in the conversation history
+    for message in conversation:
+        message['content'] = message['content'].replace('\u2028', ' ')
+
     # Call the OpenAI API to generate a response based on the conversation history
     response = openai.ChatCompletion.create(
         model=model_id,

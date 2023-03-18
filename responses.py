@@ -42,8 +42,8 @@ def get_response(user_id: str, message: str) -> str:
     if user_id not in conversation_dict:
         conversation_dict[user_id] = [{'role': 'system', 'content': system}]
     
-    # Remove line separator character from the user message
-    message = message.replace('\u2028', ' ')
+    # Encode the message as UTF-8 to handle non-ASCII characters
+    message = message.encode('utf-8')
 
     # Add the user's message to the conversation history and generate a response using the GPT-3.5 model
     conversation = conversation_dict[user_id]

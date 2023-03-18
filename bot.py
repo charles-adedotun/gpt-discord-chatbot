@@ -52,7 +52,7 @@ def run_discord_bot():
         # Get the user ID, username, message content, and channel from the message
         username = str(message.author)
         user_id = str(message.author.id)
-        user_message = str(message.content)
+        user_message = message.content.decode('utf-8') # decode the message content from bytes to a string
         channel = str(message.channel)
 
         # Print the user's message to the console for debugging purposes

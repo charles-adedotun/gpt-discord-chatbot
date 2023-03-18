@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import discord
 import os
 import responses

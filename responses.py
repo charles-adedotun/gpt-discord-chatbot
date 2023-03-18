@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import os
 import openai
 
@@ -40,6 +38,9 @@ def get_response(user_id: str, message: str) -> str:
     if user_id not in conversation_dict:
         conversation_dict[user_id] = [{'role': 'system', 'content': system}]
     
+    # Remove line separator character from the user message
+    message = message.replace('\u2028', ' ')
+
     # Add the user's message to the conversation history and generate a response using the GPT-3.5 model
     conversation = conversation_dict[user_id]
     conversation.append({'role': 'user', 'content': message})
@@ -51,7 +52,6 @@ def get_response(user_id: str, message: str) -> str:
     
     # Get the latest GPT-3.5 response and store the updated conversation history for the user
     gpt_response = conversation[-1]['content'].strip()
-    gpt_response = gpt_response.encode('utf-8')
     if tokens_used < max_tokens:
         conversation_dict[user_id] = conversation
         return gpt_response

@@ -51,6 +51,7 @@ def get_response(user_id: str, message: str) -> str:
     
     # Get the latest GPT-3.5 response and store the updated conversation history for the user
     gpt_response = conversation[-1]['content'].strip()
+    gpt_response = gpt_response.encode('utf-8')
     if tokens_used < max_tokens:
         conversation_dict[user_id] = conversation
         return gpt_response

@@ -17,10 +17,6 @@ def ChatGPT_conversation(conversation):
     
     global response
     
-    # Replace line separator character with space in the conversation history
-    for message in conversation:
-        message['content'] = message['content'].replace('\u2028', ' ')
-
     # Call the OpenAI API to generate a response based on the conversation history
     response = openai.ChatCompletion.create(
         model=model_id,
@@ -42,9 +38,6 @@ def get_response(user_id: str, message: str) -> str:
     if user_id not in conversation_dict:
         conversation_dict[user_id] = [{'role': 'system', 'content': system}]
     
-    # Encode the message as UTF-8 to handle non-ASCII characters
-    message = message.encode('utf-8')
-
     # Add the user's message to the conversation history and generate a response using the GPT-3.5 model
     conversation = conversation_dict[user_id]
     conversation.append({'role': 'user', 'content': message})

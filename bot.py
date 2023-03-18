@@ -8,12 +8,9 @@ TOKEN = os.getenv("DISCORD_API_KEY")
 # Function to send a message to the user, either as a private message or as a message in the same channel
 async def send_message(message, user_id, user_message, is_private):
     try:
-        # Encode the user message as UTF-8 bytes
-        user_message_bytes = user_message.encode('utf-8')
-
         # Get the bot's response to the user message
-        response = responses.get_response(user_id, user_message_bytes)
-
+        response = responses.get_response(user_id, user_message)
+        
         # Send the response either as a private message or as a message in the same channel
         if is_private:
             await message.author.send(response)
@@ -31,7 +28,6 @@ async def send_message(message, user_id, user_message, is_private):
         error_msg = f"Error: {str(e)}"
         print(error_msg)
         await message.channel.send(error_msg)
-
 
 # Function to run the Discord bot
 def run_discord_bot():
@@ -56,7 +52,7 @@ def run_discord_bot():
         # Get the user ID, username, message content, and channel from the message
         username = str(message.author)
         user_id = str(message.author.id)
-        user_message = message.content
+        user_message = str(message.content)
         channel = str(message.channel)
 
         # Print the user's message to the console for debugging purposes

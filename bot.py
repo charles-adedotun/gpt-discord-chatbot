@@ -8,9 +8,6 @@ TOKEN = os.getenv("DISCORD_API_KEY")
 # Function to send a message to the user, either as a private message or as a message in the same channel
 async def send_message(message, user_id, user_message, is_private):
     try:
-        # Replace line separator character with space
-        user_message = user_message.replace('\u2028', ' ')
-
         # Get the bot's response to the user message
         response = responses.get_response(user_id, user_message)
         

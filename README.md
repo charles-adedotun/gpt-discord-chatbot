@@ -9,7 +9,7 @@ This is a Discord chatbot that uses the OpenAI GPT-3.5 language model to generat
 3. Set the necessary environment variables:
    - `DISCORD_API_KEY`: Your Discord API token.
    - `OPENAI_API_KEY`: Your OpenAI API key.
-4. Run the bot using `python bot.py`.
+4. Run the bot using `python main.py`.
 
 ## Usage
 

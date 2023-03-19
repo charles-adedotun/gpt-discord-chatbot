@@ -58,15 +58,15 @@ def get_response(user_id: str, message: str) -> str:
     if tokens_used < max_tokens:
         conversation_dict[user_id] = conversation
         
-        # Log the response
-        logging.info(f'Response sent to user {user_id}: "{gpt_response}"')
+        # # Log the response
+        # logging.info(f'Response sent to user {user_id}: "{gpt_response}"')
         
         return gpt_response
     else:
         # If the maximum token limit has been exceeded, clear the conversation history for the user
         conversation_dict[user_id] = [{'role': 'system', 'content': system}]
         
-        # Log the response
-        logging.info(f'Response sent to user {user_id}: "{gpt_response}"')
+        # # Log the response
+        # logging.info(f'Response sent to user {user_id}: "{gpt_response}"')
         
         return f'`{tokens_used} tokens used. Conversation history has now been cleared. Last response:\n{gpt_response}`'

@@ -1,0 +1,9 @@
+# fly.toml file generated for gpt-discord-chatbot on 2023-03-19T15:05:47-05:00
+
+app = "gpt-discord-chatbot"
+kill_signal = "SIGINT"
+kill_timeout = 5
+primary_region = "dfw"
+processes = []
+
+[env]

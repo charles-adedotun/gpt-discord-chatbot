@@ -1,9 +1,14 @@
 import discord
 import os
+import logging
 import responses
 
 # Set the Discord API token
 TOKEN = os.getenv("DISCORD_API_KEY")
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Function to send a message to the user, either as a private message or as a message in the same channel
 async def send_message(message, user_id, user_message, is_private):
@@ -17,16 +22,19 @@ async def send_message(message, user_id, user_message, is_private):
         else:
             await message.channel.send(response)
 
+        # Log the response
+        logging.info(f'Response sent to user {user_id}: "{response}"')
+
     except discord.errors.Forbidden:
         # Handle errors if the bot doesn't have permission to send messages to the user
         error_msg = f"Error: Bot doesn't have permission to send messages to {message.author}"
-        print(error_msg)
+        logging.error(error_msg)
         await message.channel.send(error_msg)
 
     except Exception as e:
         # Handle any other errors that might occur
         error_msg = f"Error: {str(e)}"
-        print(error_msg)
+        logging.error(error_msg)
         await message.channel.send(error_msg)
 
 # Function to run the Discord bot
@@ -41,7 +49,7 @@ def run_discord_bot():
     @client.event
     async def on_ready():
         # Handle the bot's initialization when it starts running
-        print(f'{client.user} is now running!')
+        logging.info(f'{client.user} is now running!')
 
     @client.event
     async def on_message(message):
@@ -56,7 +64,7 @@ def run_discord_bot():
         channel = str(message.channel)
 
         # Print the user's message to the console for debugging purposes
-        print(f'{username} said: "{user_message}" ({channel})')
+        logging.info(f'{username} said: "{user_message}" ({channel})')
 
         # Check if the user's message is a private message to the bot (starting with a question mark)
         if user_message.startswith('?'):

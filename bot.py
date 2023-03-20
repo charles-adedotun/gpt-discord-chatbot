@@ -72,6 +72,10 @@ def run_discord_bot():
             await send_message(message, user_id, user_message, is_private=True)
         else:
             await send_message(message, user_id, user_message, is_private=False)
-    
-    # Run the Discord bot using the API token
-    client.run(TOKEN)
+
+    try:
+        # Run the Discord bot using the API token
+        client.run(TOKEN)
+    except discord.LoginFailure:
+        # Handle login errors gracefully
+        logging.error("Failed to log in to Discord API. Please check your API key and try again.")

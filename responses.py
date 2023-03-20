@@ -20,6 +20,10 @@ logging.basicConfig(level=logging.INFO,
 # Function to generate a response using the GPT-3.5 language model based on the conversation history so far
 def ChatGPT_conversation(conversation):
     
+    # Limit the conversation history to the last n messages (e.g. 8 messages)
+    n = 8
+    conversation = conversation[-n:]
+
     # Call the OpenAI API to generate a response based on the conversation history
     global response
     response = openai.ChatCompletion.create(

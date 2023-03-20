@@ -5,6 +5,8 @@ on:
     branches: [main]
 
 env:
+  AWS_REGION: us-east-1
+  ECR_REPOSITORY: gpt-discord-chatbot
   IMAGE_NAME: gpt-discord-chatbot
   
 jobs:

@@ -47,3 +47,13 @@ jobs:
       run: |
         docker tag ${{ env.IMAGE_NAME }}:latest ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
         docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${{ env.ECR_REPOSITORY }}:latest
+
+    - name: Install AWS CLI
+      run: |
+        apt-get update && \
+        apt-get install -y awscli
+
+    - name: Update ECS service
+      run: |
+        aws ecs update-service --cluster ${{ env.IMAGE_NAME }}-cluster --service ${{ env.IMAGE_NAME }}-service-1 --force-new-deployment
+        echo 'ECS service updated successfully!'

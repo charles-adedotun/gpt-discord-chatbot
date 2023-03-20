@@ -16,12 +16,16 @@ async def send_message(message, user_id, user_message, is_private):
         # Get the bot's response to the user message
         response = responses.get_response(user_id, user_message)
         
-        # Send the response either as a private message or as a message in the same channel
-        if is_private:
-            await message.author.send(response)
-        else:
-            await message.channel.send(response)
-
+        # Split the response into chunks of 2000 characters or less
+        chunks = [response[i:i+2000] for i in range(0, len(response), 2000)]
+        
+        # Send each chunk as a separate message
+        for chunk in chunks:
+            if is_private:
+                await message.author.send(chunk)
+            else:
+                await message.channel.send(chunk)
+        
         # Log the response
         logging.info(f'Response sent to user {user_id}: "{response}"')
 

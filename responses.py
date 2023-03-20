@@ -8,7 +8,7 @@ model_id = 'gpt-3.5-turbo'
 
 # Define the default system message and maximum number of tokens for the GPT-3.5 API call
 system = 'You are πGPT. You will make sure you always think through your responses step-by-step and reiterate till you are certain you did not make any mistakes. Do not make any assumptions.'
-max_tokens = 2030
+max_tokens = 1999
 
 # Create a dictionary to store conversation history for each user
 conversation_dict = {}

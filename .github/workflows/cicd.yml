@@ -1,4 +1,4 @@
-name: Build & Deploy Bot
+name: Build and Deploy Bot
 
 on:
   push:
@@ -6,6 +6,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: "433826697239"
   ECR_REPOSITORY: gpt-discord-chatbot
   IMAGE_NAME: gpt-discord-chatbot
   

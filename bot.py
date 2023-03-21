@@ -4,7 +4,10 @@ import logging
 import responses
 
 # Set the Discord API token
-TOKEN = os.getenv("DISCORD_API_KEY")
+try:
+    TOKEN = os.getenv("DISCORD_API_KEY")
+except KeyError:
+    logging.error("Please set the environment variable DISCORD_API_KEY to use the Discord API.")
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -12,6 +15,15 @@ logging.basicConfig(level=logging.INFO,
 
 # Function to send a message to the user, either as a private message or as a message in the same channel
 async def send_message(message, user_id, user_message, is_private):
+    """
+    Send a message to the user, either as a private message or as a message in the same channel.
+
+    Parameters:
+    message (discord.Message): The message object sent by the user.
+    user_id (str): The ID of the user.
+    user_message (str): The message sent by the user.
+    is_private (bool): True if the message is a private message to the bot, False otherwise.
+    """
     try:
         # Get the bot's response to the user message
         response = responses.get_response(user_id, user_message)
@@ -43,6 +55,9 @@ async def send_message(message, user_id, user_message, is_private):
 
 # Function to run the Discord bot
 def run_discord_bot():
+    """
+    Run the Discord bot.
+    """
     # Set the appropriate intents for the bot to listen for message events
     intents = discord.Intents.default()
     intents.message_content = True

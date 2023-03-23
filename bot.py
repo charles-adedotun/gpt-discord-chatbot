@@ -1,3 +1,4 @@
+import asyncio
 import discord
 import os
 import logging
@@ -13,6 +14,24 @@ except KeyError:
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+
+async def process_message(message):
+    # Get the user ID, username, message content, and channel from the message
+    username = str(message.author)
+    user_id = str(message.author.id)
+    user_message = str(message.content)
+    channel = str(message.channel)
+
+    # Print the user's message to the console for debugging purposes
+    logging.info(f'{username} said: "{user_message}" ({channel})')
+
+    # Check if the user's message is a private message to the bot (starting with a question mark)
+    if user_message.startswith('?'):
+        user_message = user_message[1:].strip()
+        await send_message(message, user_id, user_message, is_private=True)
+    else:
+        await send_message(message, user_id, user_message, is_private=False)
+
 # Function to send a message to the user, either as a private message or as a message in the same channel
 async def send_message(message, user_id, user_message, is_private):
     """
@@ -26,7 +45,7 @@ async def send_message(message, user_id, user_message, is_private):
     """
     try:
         # Get the bot's response to the user message
-        response = responses.get_response(user_id, user_message)
+        response = await responses.get_response(user_id, user_message)
         
         # Split the response into chunks of 2000 characters or less
         chunks = [response[i:i+2000] for i in range(0, len(response), 2000)]
@@ -63,7 +82,7 @@ def run_discord_bot():
     intents.message_content = True
     
     # Create a new Discord client and set the event handlers
-    client = discord.Client(intents=intents, heartbeat_timeout=300)
+    client = discord.Client(intents=intents)
 
     @client.event
     async def on_ready():
@@ -76,21 +95,8 @@ def run_discord_bot():
         if message.author == client.user:
             return
 
-        # Get the user ID, username, message content, and channel from the message
-        username = str(message.author)
-        user_id = str(message.author.id)
-        user_message = str(message.content)
-        channel = str(message.channel)
-
-        # Print the user's message to the console for debugging purposes
-        logging.info(f'{username} said: "{user_message}" ({channel})')
-
-        # Check if the user's message is a private message to the bot (starting with a question mark)
-        if user_message.startswith('?'):
-            user_message = user_message[1:].strip()
-            await send_message(message, user_id, user_message, is_private=True)
-        else:
-            await send_message(message, user_id, user_message, is_private=False)
+        # Create an asyncio task to process the message concurrently
+        asyncio.create_task(process_message(message))
 
     try:
         # Run the Discord bot using the API token

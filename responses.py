@@ -1,6 +1,7 @@
 import os
 import logging
 import openai
+import asyncio
 
 # Set the OpenAI API key and language model ID
 try:
@@ -21,7 +22,7 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Function to generate a response using the GPT-3.5 language model based on the conversation history so far
-def ChatGPT_conversation(conversation):
+async def ChatGPT_conversation(conversation):
     """
     Generate a response using the GPT-3.5 language model based on the conversation history so far.
 
@@ -52,7 +53,7 @@ def ChatGPT_conversation(conversation):
     return conversation
 
 # Function to get a response from the chatbot given the user ID and message
-def get_response(user_id: str, message: str) -> str:
+async def get_response(user_id: str, message: str) -> str:
     """
     Get a response from the chatbot given the user ID and message.
 
@@ -71,26 +72,29 @@ def get_response(user_id: str, message: str) -> str:
     # Add the user's message to the conversation history and generate a response using the GPT-3.5 model
     conversation = conversation_dict[user_id]
     conversation.append({'role': 'user', 'content': message})
-    conversation = ChatGPT_conversation(conversation)
+    
+    # Run the ChatGPT_conversation coroutine in the background using asyncio.create_task
+    task = asyncio.create_task(ChatGPT_conversation(conversation))
+    
+    # Wait for the user to send their next message while the coroutine runs in the background
+    while not task.done():
+        await asyncio.sleep(0)
+    
+    # Get the latest GPT-3.5 response and store the updated conversation history for the user
+    conversation = task.result()
+    gpt_response = conversation[-1]['content'].strip()
+    conversation_dict[user_id] = conversation
     
     # Check the API usage to see if the maximum token limit has been exceeded
     api_usage = response['usage']
     tokens_used = api_usage['total_tokens']
     
-    # Get the latest GPT-3.5 response and store the updated conversation history for the user
-    gpt_response = conversation[-1]['content'].strip()
-    if tokens_used < max_tokens:
-        conversation_dict[user_id] = conversation
-        
-        # # Log the response
-        # logging.info(f'Response sent to user {user_id}: "{gpt_response}"')
-        
-        return gpt_response
-    else:
+    # Log the response
+    logging.info(f'Response sent to user {user_id}: "{gpt_response}"')
+    
+    if tokens_used > max_tokens:
         # If the maximum token limit has been exceeded, clear the conversation history for the user
         conversation_dict[user_id] = [{'role': 'system', 'content': system}]
-        
-        # # Log the response
-        # logging.info(f'Response sent to user {user_id}: "{gpt_response}"')
-        
         return f'`{tokens_used} tokens used. Conversation history has now been cleared. Last response:\n{gpt_response}`'
+    else:
+        return gpt_response

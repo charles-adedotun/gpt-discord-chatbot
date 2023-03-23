@@ -78,6 +78,9 @@ class UserRateLimit:
         # Return True if the user is allowed to send another message
         return True
 
+# Create an instance of the UserRateLimit class with a max messages per second of 1
+user_limit = UserRateLimit(1)
+
 # Function to handle incoming messages from users
 async def handle_message(user_id, message):
     """
@@ -107,7 +110,7 @@ async def process_messages():
             user_id, message = message_queue.popleft()
             
             # Check if the user is allowed to send a message based on the rate limit
-            if check_rate_limit(user_id):
+            if user_limit.check_rate_limit(user_id):
                 # If the user is allowed to send a message, get a response from the chatbot
                 response = await get_response(user_id, message)
                 # Send the response to the user

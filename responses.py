@@ -107,7 +107,7 @@ async def process_messages():
             user_id, message = message_queue.popleft()
             
             # Check if the user is allowed to send a message based on the rate limit
-            if check_rate_limit(user_id):
+            if UserRateLimit.check_rate_limit(user_id):
                 # If the user is allowed to send a message, get a response from the chatbot
                 response = await get_response(user_id, message)
                 # Send the response to the user

@@ -45,7 +45,7 @@ async def send_message(message, user_id, user_message, is_private):
     """
     try:
         # Get the bot's response to the user message
-        response = await responses.get_response(user_id, user_message)
+        response = await responses.handle_message(user_id, user_message)
         
         # Split the response into chunks of 2000 characters or less
         chunks = [response[i:i+2000] for i in range(0, len(response), 2000)]

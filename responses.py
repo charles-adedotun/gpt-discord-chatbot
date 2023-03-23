@@ -2,7 +2,8 @@ import os
 import logging
 import openai
 import asyncio
-
+import time
+from collections import deque
 # Set the OpenAI API key and language model ID
 try:
     openai.api_key = os.environ["OPENAI_API_KEY"]
@@ -17,9 +18,80 @@ max_tokens = 1999
 # Create a dictionary to store conversation history for each user
 conversation_dict = {}
 
+# Define a dictionary to store the last message timestamp for each user
+last_message_dict = {}
+
+# Define a deque to store incoming messages from all users
+message_queue = deque()
+
+# Define the maximum number of messages that can be processed per second
+max_messages_per_second = 1
+
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Function to check if a user is allowed to send a message based on the rate limit
+def check_rate_limit(user_id):
+    """
+    Check if a user is allowed to send a message based on the rate limit.
+    
+    Parameters:
+    user_id (str): The ID of the user who sent the message.
+    
+    Returns:
+    bool: True if the user is allowed to send a message, False otherwise.
+    """
+    global last_message_dict
+    current_time = time.time()
+    if user_id in last_message_dict:
+        last_message_time = last_message_dict[user_id]
+        time_elapsed = current_time - last_message_time
+        if time_elapsed < 1 / max_messages_per_second:
+            return False
+    last_message_dict[user_id] = current_time
+    return True
+
+# Function to handle incoming messages from users
+async def handle_message(user_id, message):
+    """
+    Handle an incoming message from a user.
+
+    Parameters:
+    user_id (str): The ID of the user.
+    message (str): The message sent by the user.
+    """
+    global response
+    # Add the user's message to the message queue
+    message_queue.append((user_id, message))
+    
+    # Create a task to process the messages in the message queue
+    response = await process_messages()
+    return response
+
+# Function to process incoming messages from the message queue
+async def process_messages():
+    """
+    Process incoming messages from the message queue.
+    """
+    global response
+    while True:
+        if message_queue:
+            # Get the next message from the queue
+            user_id, message = message_queue.popleft()
+            
+            # Check if the user is allowed to send a message based on the rate limit
+            if check_rate_limit(user_id):
+                # If the user is allowed to send a message, get a response from the chatbot
+                response = await get_response(user_id, message)
+                # Send the response to the user
+                return response
+            else:
+                # If the user is not allowed to send a message, add the message back to the queue
+                message_queue.appendleft((user_id, message))
+        
+        # Wait for a short period of time before checking the message queue again
+        await asyncio.sleep(1 / max_messages_per_second)
 
 # Function to generate a response using the GPT-3.5 language model based on the conversation history so far
 async def ChatGPT_conversation(conversation):
@@ -73,10 +145,10 @@ async def get_response(user_id: str, message: str) -> str:
     conversation = conversation_dict[user_id]
     conversation.append({'role': 'user', 'content': message})
     
-    # Run the ChatGPT_conversation coroutine in the background using asyncio.create_task
+    # Call the ChatGPT_conversation coroutine to generate a response
     task = asyncio.create_task(ChatGPT_conversation(conversation))
     
-    # Wait for the user to send their next message while the coroutine runs in the background
+    # Wait for the response to be generated
     while not task.done():
         await asyncio.sleep(0)
     

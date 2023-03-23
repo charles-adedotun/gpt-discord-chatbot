@@ -82,7 +82,7 @@ def run_discord_bot():
     intents.message_content = True
     
     # Create a new Discord client and set the event handlers
-    client = discord.Client(intents=intents)
+    client = discord.Client(intents=intents, heartbeat_timeout=360)
 
     @client.event
     async def on_ready():

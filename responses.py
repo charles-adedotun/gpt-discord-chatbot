@@ -1,5 +1,6 @@
 import os
 import logging
+import threading
 import openai
 import asyncio
 import time
@@ -32,25 +33,50 @@ logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Function to check if a user is allowed to send a message based on the rate limit
-def check_rate_limit(user_id):
-    """
-    Check if a user is allowed to send a message based on the rate limit.
-    
-    Parameters:
-    user_id (str): The ID of the user who sent the message.
-    
-    Returns:
-    bool: True if the user is allowed to send a message, False otherwise.
-    """
-    global last_message_dict
-    current_time = time.time()
-    if user_id in last_message_dict:
-        last_message_time = last_message_dict[user_id]
-        time_elapsed = current_time - last_message_time
-        if time_elapsed < 1 / max_messages_per_second:
-            return False
-    last_message_dict[user_id] = current_time
-    return True
+class UserRateLimit:
+    def __init__(self, max_messages_per_second):
+        """
+        Initializes a UserRateLimit object
+
+        Parameters:
+        max_messages_per_second (int): Maximum number of messages allowed per second
+        """
+        self.mutex = threading.Lock()
+        self.max_messages_per_second = max_messages_per_second
+        self.user_last_message_times = {}
+
+    def check_rate_limit(self, user_id):
+        """
+        Check if a user is allowed to send a message based on the rate limit.
+
+        Parameters:
+        user_id (str): The ID of the user who sent the message.
+
+        Returns:
+        bool: True if the user is allowed to send a message, False otherwise.
+        """
+
+        # Get the current time
+        current_time = time.time()
+
+        # Synchronize access to the shared dictionary
+        with self.mutex:
+            if user_id in self.user_last_message_times:
+                # Get the time of the last message sent by the user
+                last_message_time = self.user_last_message_times[user_id]
+                
+                # Calculate the time elapsed since the last message
+                time_elapsed = current_time - last_message_time
+
+                # Check if the time elapsed is less than the inverse of max messages per second
+                # If it is less, then the user has exceeded the message limit per second and is not allowed to send another message
+                if time_elapsed < 1 / self.max_messages_per_second:
+                    return False
+            # Update the user_last_message_times dictionary with the current time
+            self.user_last_message_times[user_id] = current_time
+
+        # Return True if the user is allowed to send another message
+        return True
 
 # Function to handle incoming messages from users
 async def handle_message(user_id, message):

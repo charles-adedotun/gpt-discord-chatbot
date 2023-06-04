@@ -6,7 +6,7 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  AWS_ACCOUNT_ID: "433826697239"
+  AWS_ACCOUNT_ID: ${{ env.ACCOUNT_ID }}
   ECR_REPOSITORY: gpt-discord-chatbot
   IMAGE_NAME: gpt-discord-chatbot
   

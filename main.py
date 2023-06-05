@@ -1,10 +1,9 @@
-import bot
-import logging
+import discord_bot
+from config import setup_logging
+
+# Set up logging
+logger = setup_logging()
 
 if __name__ == '__main__':
-    # Configure logging
-    logging.basicConfig(level=logging.INFO,
-                        format='%(asctime)s - %(levelname)s - %(message)s')
-  
-    logging.info("Starting Discord bot...")
-    bot.run_discord_bot()
+    logger.info("Starting Discord bot...")
+    discord_bot.run_discord_bot()

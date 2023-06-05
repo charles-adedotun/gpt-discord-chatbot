@@ -19,4 +19,4 @@ To send a private message to the bot, start your message with a question mark (`
 
 ## Credits
 
-This project was created by Charles Adedotun. It uses the OpenAI API and the Discord API.
+This project was created by Marcus Adebayo. It uses LangChain, OpenAI GPT-3.5 turbo chat model and the Discord API

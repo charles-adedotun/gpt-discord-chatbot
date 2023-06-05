@@ -2,7 +2,7 @@
 FROM python:3.10-alpine
 
 # Add Metadata
-LABEL maintainer="Charles Adedotun <charles.adedotun8@gamil.com>"
+LABEL maintainer="Marcus Adebayo <marcus.adebayo8@gamil.com>"
 LABEL description="A Discord chatbot that uses the OpenAI GPT-3.5 model for natural language processing."
 
 # Set the working directory in the container
@@ -28,3 +28,4 @@ USER appuser
 
 # Start the application
 CMD ["python", "main.py"]
+

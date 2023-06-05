@@ -1,19 +1,13 @@
 import asyncio
 import discord
-import os
-import logging
-import responses
+from config import setup_logging, get_discord_api_key
+from process_message import send_message_to_chain
 
-# Set the Discord API token
-try:
-    TOKEN = os.getenv("DISCORD_API_KEY")
-except KeyError:
-    logging.error("Please set the environment variable DISCORD_API_KEY to use the Discord API.")
+# Get Discord API key
+DISCORD_API_KEY = get_discord_api_key()
 
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
-
+# Set up logging
+logger = setup_logging()
 
 async def process_message(message):
     # Get the user ID, username, message content, and channel from the message
@@ -23,7 +17,7 @@ async def process_message(message):
     channel = str(message.channel)
 
     # Print the user's message to the console for debugging purposes
-    logging.info(f'{username} said: "{user_message}" ({channel})')
+    logger.info(f'{username} said: "{user_message}" ({channel})')
 
     # Check if the user's message is a private message to the bot (starting with a question mark)
     if user_message.startswith('?'):
@@ -45,31 +39,34 @@ async def send_message(message, user_id, user_message, is_private):
     """
     try:
         # Get the bot's response to the user message
-        response = await responses.handle_message(user_id, user_message)
-        
+        response = send_message_to_chain(user_id, user_message)
+
+        if response is None:
+            response = "I'm sorry, but I couldn't generate a response."
+
         # Split the response into chunks of 2000 characters or less
         chunks = [response[i:i+2000] for i in range(0, len(response), 2000)]
-        
+
         # Send each chunk as a separate message
         for chunk in chunks:
             if is_private:
                 await message.author.send(chunk)
             else:
                 await message.channel.send(chunk)
-        
+
         # Log the response
-        logging.info(f'Response sent to user {user_id}: "{response}"')
+        logger.info(f'Response sent to user {user_id}: "{response}"')
 
     except discord.errors.Forbidden:
         # Handle errors if the bot doesn't have permission to send messages to the user
         error_msg = f"Error: Bot doesn't have permission to send messages to {message.author}"
-        logging.error(error_msg)
+        logger.error(error_msg)
         await message.channel.send(error_msg)
 
     except Exception as e:
         # Handle any other errors that might occur
         error_msg = f"Error: {str(e)}"
-        logging.error(error_msg)
+        logger.error(error_msg)
         await message.channel.send(error_msg)
 
 # Function to run the Discord bot
@@ -87,7 +84,7 @@ def run_discord_bot():
     @client.event
     async def on_ready():
         # Handle the bot's initialization when it starts running
-        logging.info(f'{client.user} is now running!')
+        logger.info(f'{client.user} is now running!')
 
     @client.event
     async def on_message(message):
@@ -100,7 +97,7 @@ def run_discord_bot():
 
     try:
         # Run the Discord bot using the API token
-        client.run(TOKEN)
+        client.run(DISCORD_API_KEY)
     except discord.LoginFailure:
         # Handle login errors gracefully
-        logging.error("Failed to log in to Discord API. Please check your API key and try again.")
+        logger.error("Failed to log in to Discord API. Please check your API key and try again.")

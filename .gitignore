@@ -1,2 +1,26 @@
 .DS_Store
 __pycache__
+
+# .gitignore
+__pycache__
+*.py[cod]
+*.pyd
+*.pyo
+*.pyz
+
+# virtual environment
+venv/
+
+# flask
+instance/
+
+# pyenv
+.python-version
+
+# secret
+.env
+
+# logs
+logs/
+
+start.sh
